@@ -1,4 +1,5 @@
 import pandas as pd
+import sklearn.model_selection
 from tqdm import tqdm
 from tracking_policy_agendas.classifiers.pa_clf import PAClf
 from tracking_policy_agendas.classifiers.xgb_clf import XgbClf
@@ -15,25 +16,34 @@ def inference_pipeline(model_path: str, input_text: str):
 
 
 def main(embedding_frame:pd.DataFrame, dataframe: pd.DataFrame, save_path: str):
-    xgb = XgbClf(text_array=dataframe.prep_text, labels=dataframe.label, embedding_doc=embedding_frame.prep_text)
-    xgb.fit()
+    dataframe.replace('', float('NaN')).dropna(inplace=True)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(dataframe.text, dataframe.label, stratify=dataframe.label)
+    xgb = XgbClf(embedding_doc=embedding_frame.text)
+    xgb.fit(X_train, y_train)
+    xgb.predict(X_test, y_test)
     xgb.save_model('xgb_' + save_path)
-    pa = PAClf(text_array=dataframe.prep_text, labels=dataframe.label, embedding_doc=embedding_frame.prep_text)
-    pa.fit()
+    pa = PAClf(embedding_doc=embedding_frame.text)
+    pa.fit(X_train, y_train)
+    pa.predict(X_test, y_test)
     pa.save_model('pa_' + save_path)
-    lasso = LassoClf(text_array=dataframe.prep_text, labels=dataframe.label, embedding_doc=embedding_frame.prep_text)
-    lasso.fit()
+    lasso = LassoClf(embedding_doc=embedding_frame.text)
+    lasso.fit(X_train, y_train)
+    lasso.predict(X_test, y_test)
     lasso.save_model('lasso_' + save_path)
-    gnb = GNBClf(text_array=dataframe.prep_text, labels=dataframe.label, embedding_doc=embedding_frame.prep_text)
-    gnb.fit()
+    gnb = GNBClf(embedding_doc=embedding_frame.text)
+    gnb.fit(X_train, y_train)
+    gnb.predict(X_test, y_test)
     gnb.save_model('gnb_' + save_path)
 
 
 if __name__ == '__main__':
-    df = pd.read_excel('jcpoa_sampling.xlsx')[['text', 'prep_text', 'label']]
-    emb_df = df
-    df['prep_text'] = df.prep_text.progress_apply(lambda item: remove_redundant_characters(remove_emoji(item)))
-    df = df.replace('', float('NaN')).dropna()
-    emb_df['prep_text'] = emb_df.prep_text.progress_apply(lambda item: remove_redundant_characters(remove_emoji(item)))
-    emb_df = emb_df.replace('', float('NaN')).dropna()
-    main(emb_df, df, 'jcpoa')
+    df = pd.read_excel('vacine_sampling.xlsx')
+    # df = pd.read_excel('tweet-zare-relabeled.xlsx')
+    # df['label'] = df['polarity-z'].apply(lambda item: int(item == 'positive'))
+    # emb_df = pd.read_excel('tweet-zare-relabeled.xlsx')
+    emb_df = pd.read_excel('clf_status_id_dummy.xlsx').sample(30000)
+    # df['prep_text'] = df.text.progress_apply(lambda item: remove_redundant_characters(remove_emoji(item)))
+    # df = df.replace('', float('NaN')).dropna()
+    # emb_df['prep_text'] = emb_df.text.progress_apply(lambda item: remove_redundant_characters(remove_emoji(item)))
+    # emb_df = emb_df.replace('', float('NaN')).dropna()
+    main(emb_df, df, 'vaccine')

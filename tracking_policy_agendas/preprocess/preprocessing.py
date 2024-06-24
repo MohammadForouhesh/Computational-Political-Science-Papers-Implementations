@@ -69,8 +69,8 @@ def remove_redundant_characters(text: str) -> str:
     text = re.sub(r"[\(\)]", " ", text)  # remove parantesis
     text = re.sub(r"\d|[۰-۹]", " ", text)
     text = re.sub(r"&|:", " ", text)
-    text = re.sub(r"[A-Za-z]", " ", text)
-    text = re.sub(r"[0-9]", " ", text)
+    # text = re.sub(r"[A-Za-z]", " ", text)
+    # text = re.sub(r"[0-9]", " ", text)
     text = re.sub(r"\"", " ", text)
     text = re.sub(r"\'", " ", text)
     text = re.sub(r"_", " ", text)
@@ -85,7 +85,8 @@ def remove_redundant_characters(text: str) -> str:
     text = text.replace('…', ' ')
     text = text.replace('?', ' ')
     # text = ' '.join(list(map(lambda word: '' if len(word) < 3 else word, text.split())))
-    return ' '.join([word for word in text.split(' ') if len(word) > 1
-                     and False not in [char in 'آ ا ب پ ت ث ج چ ح خ د ذ ر ز ژ س ش ص ض ط ظ ع غ ف ق ک گ ل م ن و ه ی'
-                                       for char in word]
-                     and len(text.split(' ')) > 1])
+    # return ' '.join([word for word in text.split(' ') if len(word) > 1
+    #                  and False not in [char in 'آ ا ب پ ت ث ج چ ح خ د ذ ر ز ژ س ش ص ض ط ظ ع غ ف ق ک گ ل م ن و ه ی'
+    #                                    for char in word]
+    #                  and len(text.split(' ')) > 1])
+    return text
